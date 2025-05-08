@@ -1,0 +1,21 @@
+---
+name: "Cleanup Bicep"
+
+on: # yamllint disable-line rule:truthy
+  workflow_dispatch:
+    inputs:
+      pullRequestNumber:
+        description: "Pull Request Number"
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  Destroy:
+    uses: ./.github/workflows/template.bicep.cleanup.yml
+    with:
+      pullRequestnumber: ${{ github.event.inputs.pullRequestNumber }}
+      githubEnvironment: symphony
+    secrets: inherit

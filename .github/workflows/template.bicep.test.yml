@@ -1,0 +1,91 @@
+---
+name: "Template-Bicep-Test"
+
+on: # yamllint disable-line rule:truthy
+  workflow_call:
+    inputs:
+      environmentName:
+        type: string
+        required: true
+      locationName:
+        type: string
+        required: true
+      branchName:
+        required: true
+        type: string
+      githubEnvironment:
+        type: string
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+  issues: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  Test:
+    name: Test
+    runs-on: self-hosted
+    environment: ${{ inputs.githubEnvironment }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branchName }}
+
+      - name: Setup Toolset
+        run: |
+          ./setup-azcli.sh
+          ./setup-powershell.sh
+          ./setup-pester.sh
+          ./setup-benchpress.sh
+          ./setup-azpowershell.sh
+          source ~/.bashrc
+        working-directory: scripts/orchestrators
+
+      - uses: azure/login@v2
+        name: Run Azure Login
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
+
+      - name: Fetch Cached Environment
+        id: cache-env
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/IAC/Bicep/bicep/.env
+          key: ${{ runner.os }}-${{ github.run_id }}-bicep-env
+
+      - name: Run e2e tests
+        env:
+          ENVIRONMENT_NAME: ${{ inputs.environmentName }}
+          LOCATION_NAME: ${{ inputs.locationName }}
+          WORKSPACE_PATH: ${{ github.workspace }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          source ./tests.runner.sh
+
+          pushd ../../IAC/Bicep/bicep
+            load_dotenv
+          popd
+
+          bicep pester
+        working-directory: scripts/orchestrators
+
+      - name: Upload E2E Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test--results
+          path: IAC/Bicep/test/end_to_end
+
+      - name: Publish E2E Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          nunit_files: "./IAC/Bicep/test/end_to_end/*.xml"
+          check_name: "E2E Tests Results"
+          action_fail: true

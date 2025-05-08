@@ -1,0 +1,25 @@
+---
+name: PR Cleanup Bicep
+
+on: # yamllint disable-line rule:truthy
+  pull_request_target:
+    types:
+      - closed
+    branches:
+      - main
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  Cleanup:
+    uses: ./.github/workflows/template.bicep.cleanup.yml
+    with:
+      pullRequestNumber: ${{ github.event.pull_request.number }}
+      githubEnvironment: symphony
+    secrets: inherit
