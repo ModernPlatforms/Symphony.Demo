@@ -1,8 +1,3 @@
-$PesterPreference = [PesterConfiguration]::Default
-$PesterPreference.OutputFormat = 'None'
-$PesterPreference.Show = 'All'
-$PesterPreference.Verbose = $true
-$PesterPreference.Output.Verbosity = 'Detailed'
 
 BeforeAll {
   Import-Module BenchPress.Azure
