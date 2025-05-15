@@ -90,12 +90,12 @@ bicep() {
     pushd ./end_to_end
     # if the test file is not specified, run for all files
     if [ -z "${1}" ]; then
-      pwsh -Command "Invoke-Pester -OutputFile test.xml -OutputFormat NUnitXML -EnableExit"
+      pwsh -Command "Invoke-Pester -OutputFile test.xml -OutputFormat NUnitXML -EnableExit -Output Detailed"
     else
       TEST_FILE=$(find ${1})
 
       if [ ! -z "${TEST_FILE}" ]; then
-        pwsh -Command "Invoke-Pester -OutputFile test.xml -OutputFormat NUnitXML ${TEST_FILE} -EnableExit"
+        pwsh -Command "Invoke-Pester -OutputFile test.xml -OutputFormat NUnitXML ${TEST_FILE} -EnableExit -Output Detailed"
       fi
     fi
 
