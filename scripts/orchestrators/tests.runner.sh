@@ -90,28 +90,23 @@ bicep() {
   pushd ./end_to_end
 
   if [ -z "${1}" ]; then
-    pwsh -Command @"
-      \$config = New-PesterConfiguration
-      \$config.Run.Path = '.'
-      \$config.Output.Verbosity = 'Detailed'
-      \$config.TestResult.Enabled = \$true
-      \$config.TestResult.OutputPath = 'test.xml'
-      \$config.TestResult.OutputFormat = 'NUnitXml'
-      Invoke-Pester -Configuration \$config
-"@
+    pwsh -Command "\$config = New-PesterConfiguration; \
+      \$config.Run.Path = '.'; \
+      \$config.Output.Verbosity = 'Detailed'; \
+      \$config.TestResult.Enabled = \$true; \
+      \$config.TestResult.OutputPath = 'test.xml'; \
+      \$config.TestResult.OutputFormat = 'NUnitXml'; \
+      Invoke-Pester -Configuration \$config"
   else
     TEST_FILE=$(find ${1})
 
-    if [ ! -z "${TEST_FILE}" ]; then
-      pwsh -Command @"
-        \$config = New-PesterConfiguration
-        \$config.Run.Path = '${TEST_FILE}'
-        \$config.Output.Verbosity = 'Detailed'
-        \$config.TestResult.Enabled = \$true
-        \$config.TestResult.OutputPath = 'test.xml'
-        \$config.TestResult.OutputFormat = 'NUnitXml'
-        Invoke-Pester -Configuration \$config
-"@
+    pwsh -Command "\$config = New-PesterConfiguration; \
+      \$config.Run.Path = '${TEST_FILE}'; \
+      \$config.Output.Verbosity = 'Detailed'; \
+      \$config.TestResult.Enabled = \$true; \
+      \$config.TestResult.OutputPath = 'test.xml'; \
+      \$config.TestResult.OutputFormat = 'NUnitXml'; \
+      Invoke-Pester -Configuration \$config"
     fi
   fi
 
